@@ -1,0 +1,9 @@
+## Setup java
+
+if [ `uname -m` == 'x86_64' ]; then
+ PATH="/usr/lib64/jvm/java-7-oracle/jre/bin/"
+ JAVA_HOME="/usr/lib64/jvm/java-7-oracle/"
+else
+ PATH="/usr/lib/jvm/java-7-oracle/jre/bin/"
+ JAVA_HOME="/usr/lib/jvm/java-7-oracle/"
+fi
