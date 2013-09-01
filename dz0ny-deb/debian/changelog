@@ -1,0 +1,13 @@
+lightdm-login-chromiumos (1.1) quantal; urgency=low
+
+  [ dz0ny ]
+  * Added boot mode, sample service impl
+
+ -- dz0ny <janez.troha@gmail.com>  Sun, 3 Feb 2013 02:11:02 +0100
+
+lightdm-login-chromiumos (1.0) quantal; urgency=low
+
+  [ dz0ny ]
+  * Initial release, fixing deb
+
+ -- dz0ny <janez.troha@gmail.com>  Sun, 11 Nov 2012 23:49:48 +0100
