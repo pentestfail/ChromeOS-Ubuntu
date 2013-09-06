@@ -1,0 +1,12 @@
+ea10aa258e3f21299e7a52dcdbe11858  opt/chromeos-plugins/flash.plugin-info
+46fee92e4b2a12414c0d4b7df63a756a  opt/chromeos-plugins/googletalk-hw.plugin-info
+ca2bfa130f191daa2aed973a55fbf326  opt/chromeos-plugins/googletalk.plugin-info
+086ede8bcb3c6c11f15a55bd66b23288  opt/chromeos-plugins/java.plugin-info
+97ffe533edc0de313df97f2b66e964b7  opt/chromeos-plugins/pdf.plugin-info
+47382b58005a8bf685d58b00b4f880c9  usr/sbin/chromeos
+5e5f284212b3f641d4533f035928feb6  usr/sbin/chromeos-dm
+7b7acc7f8ac3155ffd787634be7a7b79  usr/sbin/chromeos-plain
+4cce0db5a4b2f518ade181400ca0bead  usr/share/doc/lightdm-login-chromiumos/README.md
+ff23faa0b8aa264e63e5c27e0ef79b9d  usr/share/doc/lightdm-login-chromiumos/changelog.gz
+12f57014ba1bf6b33227733f40a55758  usr/share/doc/lightdm-login-chromiumos/copyright
+cecc4a108269a5b557a7e55b3767e878  usr/share/xsessions/chromeos.desktop
