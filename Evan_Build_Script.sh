@@ -4,41 +4,40 @@
 ## version 0.1
 ## 31 AUG, 2013
 
+set +e
+
+#Install Parallels or VMWare Tools
+## read -p "Attach ISO to install virtualization tools from [press ENTER]"
+mount /dev/cdrom /media/cdrom
+echo "Installing Parallels Tools.  Please wait for task to complete."
+/media/cdrom/install --install-unattended-with-deps
+
 ## Update Ubuntu and install dependencies & random tools (Add any tools you want now! you won't be able to later!)
 echo "Updating Ubuntu and installing dependencies"
 apt-get update
-apt-get install unzip, nano, xorg, lightdm, alsa, icedtea-7-plugin
-echo "Initializing sound devices"
-alsactl init
-
-#Install Parallels or VMWare Tools
-read -p "Attach ISO to install virtualization tools from [press ENTER]"
-mount /dev/cdrom /media/cdrom
-/media/cdrom/install
+read -p "Did the update complete successfully? [press ENTER]"
+apt-get install -y unzip nano xorg matchbox-window-manager lightdm alsa icedtea-7-plugin
 
 #Turn up volume and test audio
-read -p "You have to turn up sound on the mixer (be sure to check AUX) and ESC to exit [press ENTER]"
-alsamixer
+echo "Initializing sound devices"
+alsactl init
 echo "Testing sound output"
-speaker-test -c 2
+amixer set Master 100 umute
+amixer set AUX 100 unmute
+speaker-test -c 2 -l 1
 read -p "Did you hear sound? If not, then exit [Ctrl+C]. If good then [press ENTER]"
 
 ## Create install directory & cd
 ## mkdir /opt/chrome-build-temp/
 ## cd /opt/chrome-build-temp/
 
-## Download install files
+## Download & extract install files
 ## Need to create download .ZIP with files
 ## wget http://{link to download}
-
-## Download the updated goodies
-echo "Downloading Chrome Browser updates and Google Talk plugin"
-export CHROME="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-export TALK="https://dl.google.com/linux/direct/google-talkplugin_current_amd64.deb"
+## unzip {zip from download}
 
 ## Dz0ny's install .DEB decompiled as shells script (added copy of directories)
 echo "Installing ChromeOS"
-set -e
 LKGR=$(curl http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_ChromiumOS/LAST_CHANGE)
 URL="http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_ChromiumOS/${LKGR}/chrome-linux.zip"
 ZIPFILE=$(tempfile)
@@ -49,16 +48,17 @@ echo "Extracted Google Chrome-Linux to /opt/"
 rm -rf /opt/chromeos
 echo "Setting up directories and permissions"
 mv /opt/chrome-linux /opt/chromeos
-cp -R usr /usr
-cp -R etc /etc
-cp -R chromeos-plugins /opt
+cp -R usr/* /usr
+cp -R etc/* /etc
+cp -R chromeos-plugins/* /opt
 chmod 775 /opt/chromeos -R
+chmod 755 /etc/grub.d/11_chromeos
 chown root:root /usr/sbin/chromeos
 chown root:root /usr/sbin/chromeos-dm
 chown root:root /usr/sbin/chromeos-plain
 chown root:root /usr/share/xsessions/chromeos.desktop
-echo "Removing temporary files and directories"
-rm -rf $ZIPFILE
+## echo "Removing temporary files and directories"
+## rm -rf $ZIPFILE
 update-grub2
 
 ## Setup JAVA environment, etc.
@@ -72,29 +72,49 @@ PATH="/usr/lib/jvm/java-7-oracle/jre/bin/"
 JAVA_HOME="/usr/lib/jvm/java-7-oracle/"
 env-update
 
+## Download the updated goodies
+echo "Downloading Chrome Browser updates and Google Talk plugin"
+wget https://dl.google.com/linux/direct/google-talkplugin_current_amd64.deb
+mkdir chrome-browser
+cd chrome-browser
+ar vxg google-chrome-stable_current_amd64.deb
+tar -xvf /opt/chrome.tar.lzma -C chrome-browser
+cd ..
+mkdir chrome-talk
+cd chrome-talk
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+ar vx google-talkplugin_current_amd64.deb
+tar -xvf /opt/chrome.tar.lzma -C chrome-talk
+cd ..
+
 ## Install MP3 & MP4 libraries
-cp /opt/chrome-unstable/opt/google/chrome/libffmpegsumo.so /usr/lib/cromo/ -f
-cp /opt/chrome-unstable/opt/google/chrome/libffmpegsumo.so /opt/google/chrome/ -f
-cp /opt/chrome-unstable/opt/google/chrome/libffmpegsumo.so /usr/lib/mozilla/plugins/ -f
+cp /opt/chrome-browser/opt/google/chrome/libffmpegsumo.so /usr/lib/cromo/ -f
+cp /opt/chrome-browser/opt/google/chrome/libffmpegsumo.so /opt/google/chrome/ -f
+cp /opt/chrome-browser/opt/google/chrome/libffmpegsumo.so /usr/lib/mozilla/plugins/ -f
 
 ## Install Chrome PDF to proper directories
-cp /opt/chrome-unstable/opt/google/chrome/libpdf.so /opt/google/chrome/ -f
+cp /opt/chrome-browser/opt/google/chrome/libpdf.so /opt/google/chrome/ -f
 
 ## Install flash to proper directories
-cp /opt/chrome-unstable/opt/google/chrome/PepperFlash/libpepflashplayer.so /opt/google/chrome/pepper/ -f
-cp /opt/chrome-unstable/opt/google/chrome/PepperFlash/manifest.json /opt/google/chrome/pepper/ -f
+cp /opt/chrome-build-temp/chrome-browser/opt/google/chrome/PepperFlash/libpepflashplayer.so /opt/google/chrome/pepper/ -f
+cp /opt/chrome-build-temp/chrome-browser/opt/google/chrome/PepperFlash/manifest.json /opt/google/chrome/pepper/ -f
 curl -L https://raw.github.com/gist/3065781/pepper-flash.info > /opt/google/chrome/pepper/pepper-flash.info
 
 ## Install Google Talk to proper directories
 ln -s /opt/google/talkplugin/libnpgoogletalk.so /opt/google/chrome/pepper/libnpgoogletalk.so
 ln -s /opt/google/talkplugin/libnpgtpo3dautoplugin.so /opt/google/chrome/pepper/libnpgtpo3dautoplugin.so
 
-## Install updated chrome build, Java, GoogleTalk, Flash, etc.
-wget https://gist.github.com/shagr4th/6178203/raw/ab97b222c7a8679e933a83a13a3223261ebdadd4/br3ker.sh
+## Disable sandbox in chrome launch configuration
+## nano /usr/sbin/chromeos
+## --disable-setuid-sandbox
 
 ## Set lightdm to auto-login with "mybitch" username
 sudo /usr/lib/lightdm/lightdm-set-defaults --autologin mybitch
 
-## Cleanup
-read -p "Do you want to delete install files? If NO, then exit [Ctrl+C]. If YES then [press ENTER]"
-rm -rf /opt/chrome-build-temp/
+## Cleanup & download any missing dependencies
+read -p "Do you want to delete install files? If NO, then exit [Ctrl+C] and manually reboot. If YES then [press ENTER]"
+## rm -rf /opt/chrome-build-temp/
+apt-get -f install
+
+## Reboot post install
+## reboot
