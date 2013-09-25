@@ -14,9 +14,14 @@ echo "Installing Parallels Tools.  Please wait for task to complete."
 
 ## Update Ubuntu and install dependencies & random tools (Add any tools you want now! you won't be able to later!)
 echo "Updating Ubuntu and installing dependencies"
+apt-get install -y python-software-properties
+add-apt-repository ppa:webupd8team/java
 apt-get update
-read -p "Did the update complete successfully? [press ENTER]"
-apt-get install -y unzip nano xorg matchbox-window-manager lightdm alsa icedtea-7-plugin
+## read -p "Did the update complete successfully? [press ENTER]"
+## Accept Java license agreement automatically
+echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+## Download dependencies
+apt-get install -y unzip nano xorg matchbox-window-manager lightdm alsa icedtea-7-plugin oracle-java7-installer oracle-java7-set-default python3 python3-dbus
 
 #Turn up volume and test audio
 echo "Initializing sound devices"
@@ -37,6 +42,7 @@ read -p "Did you hear sound? If not, then exit [Ctrl+C]. If good then [press ENT
 ## unzip {zip from download}
 
 ## Dz0ny's install .DEB decompiled as shells script (added copy of directories)
+set -e
 echo "Installing ChromeOS"
 LKGR=$(curl http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_ChromiumOS/LAST_CHANGE)
 URL="http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_ChromiumOS/${LKGR}/chrome-linux.zip"
@@ -50,7 +56,7 @@ echo "Setting up directories and permissions"
 mv /opt/chrome-linux /opt/chromeos
 cp -R usr/* /usr
 cp -R etc/* /etc
-cp -R chromeos-plugins/* /opt
+cp -R chromeos-plugins/* /opt/chromeos-plugins
 chmod 775 /opt/chromeos -R
 chmod 755 /etc/grub.d/11_chromeos
 chown root:root /usr/sbin/chromeos
@@ -60,6 +66,8 @@ chown root:root /usr/share/xsessions/chromeos.desktop
 ## echo "Removing temporary files and directories"
 ## rm -rf $ZIPFILE
 update-grub2
+
+set +e
 
 ## Setup JAVA environment, etc.
 echo "Configuring JAVA environment"
@@ -107,6 +115,7 @@ ln -s /opt/google/talkplugin/libnpgtpo3dautoplugin.so /opt/google/chrome/pepper/
 ## Disable sandbox in chrome launch configuration
 ## nano /usr/sbin/chromeos
 ## --disable-setuid-sandbox
+
 
 ## Set lightdm to auto-login with "mybitch" username
 sudo /usr/lib/lightdm/lightdm-set-defaults --autologin mybitch
